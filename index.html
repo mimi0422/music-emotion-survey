@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>音楽から感じる感情に関する聴取アンケート</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --border: #e5e7eb;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px 14px 60px;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      margin: 0 0 12px;
+      line-height: 1.4;
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .hidden { display: none !important; }
+
+    /* 進捗バー */
+    .progress-wrap {
+      margin-bottom: 16px;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* 注意ボックス */
+    .notice-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin: 14px 0;
+      font-size: 0.94rem;
+    }
+    .notice-box ul {
+      margin: 6px 0 0;
+      padding-left: 20px;
+    }
+    .notice-box li { margin-bottom: 5px; }
+
+    .demo-banner {
+      background: var(--warn-bg);
+      border: 1px solid #fcd34d;
+      color: var(--warn);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      margin-bottom: 14px;
+    }
+
+    /* 設問ブロック */
+    .q-block {
+      margin-bottom: 26px;
+    }
+    .q-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    .badge-req {
+      display: inline-block;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      font-weight: 600;
+    }
+    .badge-opt {
+      display: inline-block;
+      background: #6b7280;
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      font-weight: 600;
+    }
+    .q-note {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin: -4px 0 10px;
+    }
+
+    /* 選択肢 */
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 8px;
+    }
+    .opt-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fff;
+      transition: background 0.15s, border-color 0.15s;
+      font-size: 0.94rem;
+      user-select: none;
+    }
+    .opt-item:hover {
+      background: #f9fafb;
+      border-color: #cbd5e1;
+    }
+    .opt-item input {
+      margin: 0;
+      transform: scale(1.12);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .opt-item.disabled-opt {
+      opacity: 0.45;
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+
+    /* 5段階スケール */
+    .likert-wrap {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .likert-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 6px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fff;
+      font-size: 0.82rem;
+      transition: all 0.15s;
+    }
+    .likert-btn:hover { background: #f9fafb; }
+    .likert-btn input { margin-bottom: 5px; transform: scale(1.12); }
+    .likert-num { font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+    .likert-label { font-size: 0.74rem; color: var(--muted); line-height: 1.25; }
+
+    /* カスタムオーディオプレイヤー（シーク不可） */
+    .player-card {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+    .player-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-play {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-play:hover { background: #2563eb; }
+    .btn-play:disabled { background: #64748b; cursor: not-allowed; }
+
+    .btn-replay {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 9px 13px;
+      font-size: 0.86rem;
+      cursor: pointer;
+    }
+    .btn-replay:hover { background: rgba(255, 255, 255, 0.08); }
+
+    .status-pill {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .status-pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+    }
+    .status-done {
+      background: rgba(16, 185, 129, 0.22);
+      color: #6ee7b7;
+    }
+
+    .audio-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #334155;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .audio-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #38bdf8;
+      transition: width 0.15s linear;
+    }
+    .audio-time {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+
+    /* ボタン・エラー */
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px 26px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .error-msg {
+      background: var(--danger-bg);
+      border: 1px solid #fecaca;
+      color: var(--danger);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+
+    .success-box {
+      background: var(--success-bg);
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .vol-test-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 560px) {
+      .card { padding: 20px 16px; }
+      .option-grid { grid-template-columns: 1fr; }
+      .likert-wrap { gap: 4px; }
+      .likert-label { font-size: 0.68rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="demoBanner" class="demo-banner hidden">
+      <strong>【デモ動作モード】</strong> GAS_ENDPOINT が未設定のため、ローカルの仮セット（Set_A）でプレビュー動作しています。本公開前に <code>index.html</code> 内の <code>GAS_ENDPOINT</code> を書き換えてください。
+    </div>
+
+    <!-- 進捗バー（楽曲パート以降に表示） -->
+    <div id="progressWrap" class="progress-wrap hidden">
+      <div class="progress-meta">
+        <span id="progressLabel">進行状況</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- =============================
+         SECTION 1: 表紙・条件・同意
+         ============================= -->
+    <section id="secIntro" class="card">
+      <h1>音楽から感じる感情に関する聴取アンケート</h1>
+      <p style="color: var(--muted); font-size: 0.92rem; margin-top: 0;">所要時間：約15分（歌詞のない短い曲・全11曲）</p>
+      <p>
+        この度はアンケートにご協力いただき、ありがとうございます。<br />
+        本調査では、さまざまな音楽（約30秒のインストゥルメンタル曲・全11曲）を聴いていただき、それぞれの曲からどのような感情を感じるかを回答していただきます。
+      </p>
+
+      <div class="notice-box">
+        <strong>【回答前のお願い（聴取環境）】</strong>
+        <ul>
+          <li>なるべく<strong>静かな環境</strong>で回答してください。</li>
+          <li>音の響きを正確に聴き取るため、できる限り<strong>イヤホンまたはヘッドホン</strong>をご使用ください。</li>
+          <li><strong>1曲目で聴きやすい音量に合わせたら、その後はなるべく音量を変えずに</strong>最後までお聴きください。</li>
+        </ul>
+      </div>
+
+      <div class="notice-box">
+        <strong>【感情の選び方についての大切なお願い】</strong>
+        <ul>
+          <li>曲を聴いて「あなた自身がその気分になったか」ではなく、<strong>「この曲自体がどのような感情を表現していると感じたか」</strong>を選んでください。</li>
+          <li>正解・不正解はありません。直感的に感じたままお答えください。</li>
+          <li>各曲とも<strong>最後まで聴き終えると次の曲へ進めます</strong>。必要に応じて何度聴き直しても構いません。</li>
+        </ul>
+      </div>
+
+      <div class="vol-test-box">
+        <span><strong>音声再生テスト：</strong>音が問題なく聞こえるか確認できます（テスト音・約2秒）</span>
+        <button type="button" id="btnTestTone" class="btn-secondary">テスト音を鳴らす</button>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--muted);">
+        <strong>【個人情報の取り扱い】</strong>回答データは匿名で統計的に処理され、学術研究目的以外には使用いたしません。途中での回答中止も可能です。
+      </p>
+
+      <div id="introError" class="error-msg hidden"></div>
+
+      <label class="opt-item" style="margin-bottom: 18px; border-color: #cbd5e1;">
+        <input type="checkbox" id="chkConsent" />
+        <span><strong>上記の説明を読み、本調査への参加に同意します。</strong></span>
+      </label>
+
+      <button type="button" id="btnToAttrs" class="btn-primary">アンケートを始める</button>
+    </section>
+
+    <!-- =============================
+         SECTION 2: 属性（A1〜A6）
+         ============================= -->
+    <section id="secAttrs" class="card hidden">
+      <h2>回答者情報・聴取環境（最初のみ）</h2>
+      <div id="attrsError" class="error-msg hidden"></div>
+
+      <!-- A1 -->
+      <div class="q-block">
+        <div class="q-title">A1. 今回、音楽を聴くために使用する機器を選んでください。<span class="badge-req">必須</span></div>
+        <div class="option-list" id="A1Container"></div>
+      </div>
+
+      <!-- A2 -->
+      <div class="q-block">
+        <div class="q-title">A2. 年齢層を選んでください。<span class="badge-req">必須</span></div>
+        <div class="option-grid" id="A2Container"></div>
+      </div>
+
+      <!-- A3 -->
+      <div class="q-block">
+        <div class="q-title">A3. 日本語の使用背景について、最も当てはまるものを選んでください。<span class="badge-req">必須</span></div>
+        <div class="option-list" id="A3Container"></div>
+      </div>
+
+      <!-- A4 -->
+      <div class="q-block">
+        <div class="q-title">A4. 楽器の演奏・作曲・DTMなどの音楽経験はどのくらいありますか。<span class="badge-req">必須</span></div>
+        <div class="option-list" id="A4Container"></div>
+      </div>
+
+      <!-- A5 -->
+      <div class="q-block">
+        <div class="q-title">A5. 普段よく聴く音楽のジャンルを選んでください。<span class="badge-req">必須</span></div>
+        <div class="q-note">当てはまるものをすべて選択してください（複数選択可）。</div>
+        <div class="option-grid" id="A5Container"></div>
+      </div>
+
+      <!-- A6 -->
+      <div class="q-block">
+        <div class="q-title">A6. 歌詞のない曲（インストゥルメンタル、BGM、クラシックなど）を普段どのくらい聴きますか。<span class="badge-req">必須</span></div>
+        <div class="option-list" id="A6Container"></div>
+      </div>
+
+      <button type="button" id="btnStartTracks" class="btn-primary">楽曲の試聴へ進む（全11曲）</button>
+    </section>
+
+    <!-- =============================
+         SECTION 3: 楽曲評価（11曲ループ）
+         ============================= -->
+    <section id="secTrack" class="card hidden">
+      <h2 id="trackHeading">第 1 曲目 / 全 11 曲</h2>
+
+      <!-- カスタムオーディオプレイヤー -->
+      <div class="player-card">
+        <div class="player-top">
+          <div class="player-controls">
+            <button type="button" id="btnPlayPause" class="btn-play">▶ 曲を再生する</button>
+            <button type="button" id="btnReplay" class="btn-replay">↺ 最初から</button>
+          </div>
+          <span id="listenStatus" class="status-pill status-pending">最後まで試聴してください</span>
+        </div>
+        <div class="audio-bar-bg">
+          <div id="audioBarFill" class="audio-bar-fill"></div>
+        </div>
+        <div class="audio-time">
+          <span id="audioCurrent">0:00</span>
+          <span id="audioDuration">0:30</span>
+        </div>
+        <audio id="audioEl" preload="auto" controlsList="nodownload"></audio>
+      </div>
+
+      <div id="trackError" class="error-msg hidden"></div>
+
+      <!-- Q1-a -->
+      <div class="q-block">
+        <div class="q-title">Q1-a. この曲が「最も強く表現している」と感じた感情を1つ選んでください。<span class="badge-req">必須</span></div>
+        <div class="option-grid" id="Q1aContainer"></div>
+      </div>
+
+      <!-- Q1-b -->
+      <div class="q-block">
+        <div class="q-title">Q1-b. Q1-aで選んだ回答に、どのくらい自信がありますか。<span class="badge-req">必須</span></div>
+        <div class="likert-wrap" id="Q1bContainer"></div>
+      </div>
+
+      <!-- Q1-c -->
+      <div class="q-block">
+        <div class="q-title">Q1-c. Q1-aで選んだもの以外に、「他にも混ざっている」と感じた感情があれば選んでください。<span class="badge-opt">任意</span></div>
+        <div class="q-note">※Q1-aで選んだ感情以外で該当するものがあれば選択してください（なければ未選択のままで構いません）。</div>
+        <div class="option-grid" id="Q1cContainer"></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-block">
+        <div class="q-title">Q2. この曲は、音楽としてどのくらい自然に聞こえましたか。<span class="badge-req">必須</span></div>
+        <div class="likert-wrap" id="Q2Container"></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-block">
+        <div class="q-title">Q3. この曲から感情を感じた主な手がかり（理由）は何でしたか。<span class="badge-req">必須</span></div>
+        <div class="q-note">当てはまるものをすべて選択してください（複数選択可）。</div>
+        <div class="option-list" id="Q3Container"></div>
+      </div>
+
+      <button type="button" id="btnNextTrack" class="btn-primary">次の曲へ進む</button>
+    </section>
+
+    <!-- =============================
+         SECTION 4: 末尾（B1・B2）
+         ============================= -->
+    <section id="secPost" class="card hidden">
+      <h2>最後の確認（あと2問で終了です）</h2>
+      <div id="postError" class="error-msg hidden"></div>
+
+      <!-- B1 -->
+      <div class="q-block">
+        <div class="q-title">B1. 今回の選択肢の中で、言葉の意味がわかりにくかったものや、他の言葉との違いに迷ったものはありますか。<span class="badge-req">必須</span></div>
+        <div class="q-note">当てはまるものをすべて選択してください（なければ「特になし」を選択）。</div>
+        <div class="option-grid" id="B1Container"></div>
+      </div>
+
+      <!-- B2 -->
+      <div class="q-block">
+        <div class="q-title">B2. 全体を通して感じたことや、印象に残った曲などがあれば自由にお書きください。<span class="badge-opt">任意</span></div>
+        <textarea id="B2Comment" placeholder="例：〇〇な響きの曲が多く感じた、迷った点など（空欄でも送信できます）"></textarea>
+      </div>
+
+      <button type="button" id="btnSubmit" class="btn-primary">回答を送信する</button>
+      <div id="backupBox" class="hidden" style="margin-top: 14px; text-align: center;">
+        <button type="button" id="btnDownloadBackup" class="btn-secondary">念のため回答データをCSVで手元に保存する</button>
+      </div>
+    </section>
+
+    <!-- =============================
+         SECTION 5: 完了画面
+         ============================= -->
+    <section id="secDone" class="card hidden">
+      <div class="success-box">
+        <h2 style="border: none; margin-bottom: 8px; color: #065f46;">ご回答ありがとうございました</h2>
+        <p style="margin: 0 0 10px;">すべての回答が正常に記録されました。このページを閉じていただいて構いません。</p>
+        <p style="font-size: 0.85rem; color: #047857; margin: 0;">回答受付ID：<code id="doneParticipantId"></code></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ★設定エリア（デプロイ後にここだけ書き換えてください）
+    // =========================================================================
+    const CONFIG = {
+      // Google Apps Script でデプロイしたウェブアプリのURLを貼り付け
+      GAS_ENDPOINT: "https://script.google.com/macros/s/AKfycbwOBebqItA5wBezTKlpjy7Xj_MK51gqhn0JXnXOaxAUdryI0AwGey7CFW0NAEAXAV8V/exec",
+      // ブラインド音声ファイル（Track_01.mp3 〜 Track_66.mp3）を配置したフォルダパス
+      AUDIO_BASE_PATH: "./audio/",
+      AUDIO_EXT: ".mp3",
+      // 試聴完了とみなす再生到達率（0.95 = 95%以上再生、または ended イベント発火）
+      MIN_LISTEN_RATIO: 0.95
+    };
+
+    // =========================================================================
+    // 設問選択肢定義（研究設計・02_preprocess_survey.py と完全一致）
+    // =========================================================================
+    const OPTIONS = {
+      A1: [
+        "イヤホン・ヘッドホン",
+        "外付けスピーカー",
+        "PC・スマートフォン・タブレットの内蔵スピーカー"
+      ],
+      A2: ["10代", "20〜24歳", "25〜29歳", "30代", "40代", "50代以上"],
+      A3: [
+        "日本語が母語（第一言語）である",
+        "日本語は母語ではない（日本語の使用歴：5年以上）",
+        "日本語は母語ではない（日本語の使用歴：5年未満）"
+      ],
+      A4: [
+        "ほとんどない（学校の授業程度）",
+        "趣味や部活などで少し経験がある（3年未満）",
+        "継続的な経験がある（3年以上）",
+        "音楽を専門的に学んだ、または仕事にしている"
+      ],
+      A5: [
+        "ポップス",
+        "ロック",
+        "クラシック",
+        "ジャズ",
+        "エレクトロニック・ダンスミュージック",
+        "ヒップホップ・R&B",
+        "映画・アニメ・ゲームなどのBGM（サウンドトラック）",
+        "伝統音楽・民族音楽",
+        "その他",
+        "普段あまり音楽を聴かない"
+      ],
+      A6: ["よく聴く", "たまに聴く", "ほとんど聴かない"],
+
+      // 五十音順・固定・ふりがな付き表示（保存値 value は純粋な日本語感情語）
+      EMOTIONS: [
+        { value: "哀愁",       label: "哀愁（あいしゅう）" },
+        { value: "怒り",       label: "怒り（いかり）" },
+        { value: "恐れ",       label: "恐れ（おそれ）" },
+        { value: "驚き",       label: "驚き（おどろき）" },
+        { value: "悲しみ",     label: "悲しみ（かなしみ）" },
+        { value: "甘酸っぱい", label: "甘酸っぱい（あまずっぱい）" },
+        { value: "嫌悪",       label: "嫌悪（けんお）" },
+        { value: "切ない",     label: "切ない（せつない）" },
+        { value: "名残惜しい", label: "名残惜しい（なごりおしい）" },
+        { value: "もどかしい", label: "もどかしい" },
+        { value: "喜び",       label: "喜び（よろこび）" }
+      ],
+      NONE_EMOTION: { value: "どれにも当てはまらない", label: "どれにも当てはまらない" },
+
+      CONFIDENCE_LABELS: ["全く自信がない", "あまり自信がない", "どちらともいえない", "やや自信がある", "非常に自信がある"],
+      NATURALNESS_LABELS: ["非常に不自然", "やや不自然", "どちらともいえない", "やや自然", "非常に自然"],
+
+      Q3_CUES: [
+        "テンポ（曲の速さ）",
+        "リズム（ビートやノリ）",
+        "メロディ（旋律）",
+        "和音・音の響き（明るさ・暗さ・不協和感など）",
+        "楽器・音色",
+        "音の強弱や展開の変化",
+        "全体の雰囲気・直感（具体的な要素はわからない）"
+      ],
+      B1_NONE: "特になし（すべて意味がわかった）"
+    };
+
+    // =========================================================================
+    // アプリ状態管理
+    // =========================================================================
+    const state = {
+      demoMode: !CONFIG.GAS_ENDPOINT || CONFIG.GAS_ENDPOINT.includes("YOUR_GAS_WEB_APP_URL"),
+      participantId: "",
+      setId: "",
+      tracks: [],
+      currentIndex: 0,
+      attributes: {},
+      trials: [],
+      // 現在の曲の再生チェック用
+      hasCompletedAudio: false,
+      playCount: 0,
+      maxPlayedSec: 0,
+      lastTimeSec: 0,
+      isPlaying: false
+    };
+
+    // =========================================================================
+    // 初期描画
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      if (state.demoMode) {
+        document.getElementById("demoBanner").classList.remove("hidden");
+      }
+      renderAttributesForm();
+      renderTrackQuestions();
+      renderPostForm();
+      bindEvents();
+    });
+
+    function createOptionEl(type, name, value, label) {
+      const lbl = document.createElement("label");
+      lbl.className = "opt-item";
+      const inp = document.createElement("input");
+      inp.type = type;
+      inp.name = name;
+      inp.value = value;
+      const span = document.createElement("span");
+      span.textContent = label;
+      lbl.appendChild(inp);
+      lbl.appendChild(span);
+      return lbl;
+    }
+
+    function renderAttributesForm() {
+      OPTIONS.A1.forEach(v => document.getElementById("A1Container").appendChild(createOptionEl("radio", "A1", v, v)));
+      OPTIONS.A2.forEach(v => document.getElementById("A2Container").appendChild(createOptionEl("radio", "A2", v, v)));
+      OPTIONS.A3.forEach(v => document.getElementById("A3Container").appendChild(createOptionEl("radio", "A3", v, v)));
+      OPTIONS.A4.forEach(v => document.getElementById("A4Container").appendChild(createOptionEl("radio", "A4", v, v)));
+
+      const a5Box = document.getElementById("A5Container");
+      OPTIONS.A5.forEach(v => {
+        const el = createOptionEl("checkbox", "A5", v, v);
+        a5Box.appendChild(el);
+      });
+      // 「普段あまり音楽を聴かない」の排他制御
+      a5Box.addEventListener("change", (e) => {
+        const noneVal = "普段あまり音楽を聴かない";
+        const boxes = Array.from(a5Box.querySelectorAll('input[name="A5"]'));
+        if (e.target.value === noneVal && e.target.checked) {
+          boxes.forEach(b => { if (b.value !== noneVal) b.checked = false; });
+        } else if (e.target.value !== noneVal && e.target.checked) {
+          boxes.forEach(b => { if (b.value === noneVal) b.checked = false; });
+        }
+      });
+
+      OPTIONS.A6.forEach(v => document.getElementById("A6Container").appendChild(createOptionEl("radio", "A6", v, v)));
+    }
+
+    function renderLikert(containerId, name, labels) {
+      const wrap = document.getElementById(containerId);
+      wrap.innerHTML = "";
+      labels.forEach((lblText, idx) => {
+        const val = idx + 1;
+        const lbl = document.createElement("label");
+        lbl.className = "likert-btn";
+        lbl.innerHTML = `<input type="radio" name="${name}" value="${val}" /><span class="likert-num">${val}</span><span class="likert-label">${lblText}</span>`;
+        wrap.appendChild(lbl);
+      });
+    }
+
+    function renderTrackQuestions() {
+      const q1a = document.getElementById("Q1aContainer");
+      [...OPTIONS.EMOTIONS, OPTIONS.NONE_EMOTION].forEach(item => {
+        q1a.appendChild(createOptionEl("radio", "Q1a", item.value, item.label));
+      });
+
+      renderLikert("Q1bContainer", "Q1b", OPTIONS.CONFIDENCE_LABELS);
+
+      const q1c = document.getElementById("Q1cContainer");
+      OPTIONS.EMOTIONS.forEach(item => {
+        q1c.appendChild(createOptionEl("checkbox", "Q1c", item.value, item.label));
+      });
+
+      // Q1-a で選んだ感情を Q1-c から自動で選択不可にして重複防止
+      q1a.addEventListener("change", () => {
+        const selected = getRadioValue("Q1a");
+        q1c.querySelectorAll('input[name="Q1c"]').forEach(cb => {
+          const parent = cb.closest(".opt-item");
+          if (cb.value === selected) {
+            cb.checked = false;
+            cb.disabled = true;
+            parent.classList.add("disabled-opt");
+          } else {
+            cb.disabled = false;
+            parent.classList.remove("disabled-opt");
+          }
+        });
+      });
+
+      renderLikert("Q2Container", "Q2", OPTIONS.NATURALNESS_LABELS);
+
+      const q3 = document.getElementById("Q3Container");
+      OPTIONS.Q3_CUES.forEach(v => q3.appendChild(createOptionEl("checkbox", "Q3", v, v)));
+    }
+
+    function renderPostForm() {
+      const b1 = document.getElementById("B1Container");
+      OPTIONS.EMOTIONS.forEach(item => {
+        b1.appendChild(createOptionEl("checkbox", "B1", item.value, item.label));
+      });
+      b1.appendChild(createOptionEl("checkbox", "B1", OPTIONS.B1_NONE, OPTIONS.B1_NONE));
+
+      // 「特になし」の排他制御
+      b1.addEventListener("change", (e) => {
+        const boxes = Array.from(b1.querySelectorAll('input[name="B1"]'));
+        if (e.target.value === OPTIONS.B1_NONE && e.target.checked) {
+          boxes.forEach(b => { if (b.value !== OPTIONS.B1_NONE) b.checked = false; });
+        } else if (e.target.value !== OPTIONS.B1_NONE && e.target.checked) {
+          boxes.forEach(b => { if (b.value === OPTIONS.B1_NONE) b.checked = false; });
+        }
+      });
+    }
+
+    // =========================================================================
+    // イベントバインド
+    // =========================================================================
+    function bindEvents() {
+      document.getElementById("btnTestTone").addEventListener("click", playTestTone);
+
+      document.getElementById("btnToAttrs").addEventListener("click", () => {
+        if (!document.getElementById("chkConsent").checked) {
+          showError("introError", "調査への参加に同意チェックを入れてください。");
+          return;
+        }
+        hideError("introError");
+        switchSection("secAttrs");
+      });
+
+      document.getElementById("btnStartTracks").addEventListener("click", handleStartTracks);
+      document.getElementById("btnNextTrack").addEventListener("click", handleNextTrack);
+      document.getElementById("btnSubmit").addEventListener("click", handleSubmit);
+      document.getElementById("btnDownloadBackup").addEventListener("click", downloadBackupCSV);
+
+      // カスタムオーディオプレイヤー制御
+      const audio = document.getElementById("audioEl");
+      const btnPlay = document.getElementById("btnPlayPause");
+      const btnReplay = document.getElementById("btnReplay");
+
+      btnPlay.addEventListener("click", async () => {
+        if (audio.paused) {
+          try {
+            await audio.play();
+          } catch (err) {
+            showError("trackError", "音声の再生に失敗しました。音声ファイル（" + audio.getAttribute("src") + "）の配置または通信環境をご確認ください。");
+          }
+        } else {
+          audio.pause();
+        }
+      });
+
+      btnReplay.addEventListener("click", async () => {
+        audio.currentTime = 0;
+        state.lastTimeSec = 0;
+        try {
+          await audio.play();
+        } catch (err) {
+          showError("trackError", "音声の再生に失敗しました。");
+        }
+      });
+
+      audio.addEventListener("play", () => {
+        state.isPlaying = true;
+        if (audio.currentTime < 1.0) state.playCount += 1;
+        btnPlay.textContent = "❚❚ 一時停止";
+      });
+
+      audio.addEventListener("pause", () => {
+        state.isPlaying = false;
+        btnPlay.textContent = "▶ 再生を再開";
+      });
+
+      audio.addEventListener("loadedmetadata", () => {
+        if (isFinite(audio.duration)) {
+          document.getElementById("audioDuration").textContent = formatTime(audio.duration);
+        }
+      });
+
+      audio.addEventListener("timeupdate", () => {
+        if (!isFinite(audio.duration) || audio.duration <= 0) return;
+        const cur = audio.currentTime;
+        // スキップ防止：自然な再生進行（1.5秒以内の差分）のみ maxPlayedSec を更新
+        if (cur >= state.lastTimeSec && (cur - state.lastTimeSec) <= 1.5) {
+          state.maxPlayedSec = Math.max(state.maxPlayedSec, cur);
+        }
+        state.lastTimeSec = cur;
+
+        const pct = Math.min(100, (cur / audio.duration) * 100);
+        document.getElementById("audioBarFill").style.width = pct.toFixed(1) + "%";
+        document.getElementById("audioCurrent").textContent = formatTime(cur);
+
+        if (!state.hasCompletedAudio && (state.maxPlayedSec / audio.duration) >= CONFIG.MIN_LISTEN_RATIO) {
+          markAudioCompleted();
+        }
+      });
+
+      audio.addEventListener("ended", () => {
+        state.isPlaying = false;
+        btnPlay.textContent = "▶ もう一度聴く";
+        document.getElementById("audioBarFill").style.width = "100%";
+        markAudioCompleted();
+      });
+
+      audio.addEventListener("error", () => {
+        showError("trackError", "音声ファイルが読み込めませんでした。通信状態をご確認のうえ再試行してください。");
+      });
+    }
+
+    function markAudioCompleted() {
+      state.hasCompletedAudio = true;
+      const pill = document.getElementById("listenStatus");
+      pill.textContent = "✓ 試聴完了（何度でも聴き直せます）";
+      pill.className = "status-pill status-done";
+    }
+
+    // Web Audio API で外部ファイル不要のテスト音（優しいサイン波和音）を鳴らす
+    function playTestTone() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      [440, 554.37, 659.25].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.001, now + i * 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.08, now + i * 0.15 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.15 + 1.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.15);
+        osc.stop(now + i * 0.15 + 1.25);
+      });
+    }
+
+    // =========================================================================
+    // 属性検証 → GASからセット＆ランダム曲順を取得
+    // =========================================================================
+    async function handleStartTracks() {
+      const A1 = getRadioValue("A1");
+      const A2 = getRadioValue("A2");
+      const A3 = getRadioValue("A3");
+      const A4 = getRadioValue("A4");
+      const A5 = getCheckboxValues("A5");
+      const A6 = getRadioValue("A6");
+
+      if (!A1 || !A2 || !A3 || !A4 || A5.length === 0 || !A6) {
+        showError("attrsError", "未回答の必須項目があります。A1〜A6をすべて選択してください。");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      hideError("attrsError");
+
+      state.attributes = {
+        A1_device: A1,
+        A2_age: A2,
+        A3_jp_bg: A3,
+        A4_music_exp: A4,
+        A5_genres: A5,
+        A6_inst_freq: A6
+      };
+
+      const btn = document.getElementById("btnStartTracks");
+      btn.disabled = true;
+      btn.textContent = "楽曲セットを準備しています...";
+
+      const langKey = A3.includes("母語（第一言語）") ? "native" : "non_native";
+
+      try {
+        if (state.demoMode) {
+          // GAS未接続時のデモ用仮セット（Track_01〜Track_11をランダム出題）
+          state.participantId = "DEMO_" + Date.now();
+          state.setId = "Set_A";
+          const demoTracks = Array.from({ length: 11 }, (_, i) => "Track_" + String(i + 1).padStart(2, "0"));
+          state.tracks = demoTracks.sort(() => Math.random() - 0.5);
+        } else {
+          const url = `${CONFIG.GAS_ENDPOINT}?action=assign&lang=${encodeURIComponent(langKey)}`;
+          const res = await fetch(url, { method: "GET" });
+          const data = await res.json();
+          if (data.status !== "ok" || !Array.isArray(data.tracks) || data.tracks.length === 0) {
+            throw new Error(data.message || "セットの取得に失敗しました。");
+          }
+          state.participantId = data.participant_id;
+          state.setId = data.set_id;
+          state.tracks = data.tracks;
+        }
+
+        state.currentIndex = 0;
+        state.trials = [];
+        document.getElementById("progressWrap").classList.remove("hidden");
+        switchSection("secTrack");
+        loadTrack(0);
+      } catch (err) {
+        showError("attrsError", "サーバーとの通信に失敗しました。時間をおいてもう一度お試しください。（詳細: " + err.message + "）");
+        btn.disabled = false;
+        btn.textContent = "楽曲の試聴へ進む（全11曲）";
+      }
+    }
+
+    // =========================================================================
+    // 各曲のロード・バリデーション・次へ
+    // =========================================================================
+    function loadTrack(idx) {
+      const total = state.tracks.length;
+      const trackId = state.tracks[idx];
+
+      // 見出し・進捗更新（Track IDは画面に出さずブラインド維持）
+      document.getElementById("trackHeading").textContent = `第 ${idx + 1} 曲目 / 全 ${total} 曲`;
+      updateProgress(idx, total + 1, `楽曲評価 ${idx + 1} / ${total} 曲目`);
+
+      // ボタン文言
+      document.getElementById("btnNextTrack").textContent =
+        (idx === total - 1) ? "最後の確認画面へ進む" : "次の曲へ進む";
+
+      // 再生状態リセット
+      state.hasCompletedAudio = false;
+      state.playCount = 0;
+      state.maxPlayedSec = 0;
+      state.lastTimeSec = 0;
+      state.isPlaying = false;
+
+      const audio = document.getElementById("audioEl");
+      audio.pause();
+      audio.src = `${CONFIG.AUDIO_BASE_PATH}${trackId}${CONFIG.AUDIO_EXT}`;
+      audio.load();
+
+      document.getElementById("btnPlayPause").textContent = "▶ 曲を再生する";
+      document.getElementById("audioBarFill").style.width = "0%";
+      document.getElementById("audioCurrent").textContent = "0:00";
+      document.getElementById("audioDuration").textContent = "0:30";
+      const pill = document.getElementById("listenStatus");
+      pill.textContent = "最後まで試聴してください";
+      pill.className = "status-pill status-pending";
+
+      // 設問リセット
+      hideError("trackError");
+      ["Q1a", "Q1b", "Q1c", "Q2", "Q3"].forEach(name => {
+        document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+          el.checked = false;
+          el.disabled = false;
+          const p = el.closest(".opt-item");
+          if (p) p.classList.remove("disabled-opt");
+        });
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function handleNextTrack() {
+      if (!state.hasCompletedAudio) {
+        showError("trackError", "この曲を最後まで聴き終えてから次へ進んでください。");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      const q1a = getRadioValue("Q1a");
+      const q1b = getRadioValue("Q1b");
+      const q1c = getCheckboxValues("Q1c");
+      const q2 = getRadioValue("Q2");
+      const q3 = getCheckboxValues("Q3");
+
+      if (!q1a || !q1b || !q2 || q3.length === 0) {
+        showError("trackError", "未回答の必須項目があります（Q1-a、Q1-b、Q2、Q3は必須です）。");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      hideError("trackError");
+
+      const audio = document.getElementById("audioEl");
+      audio.pause();
+
+      state.trials.push({
+        presentation_order: state.currentIndex + 1,
+        track_id: state.tracks[state.currentIndex],
+        play_count: Math.max(1, state.playCount),
+        Q1_a: q1a,
+        Q1_b: Number(q1b),
+        Q1_c: q1c,
+        Q2_naturalness: Number(q2),
+        Q3_cues: q3
+      });
+
+      state.currentIndex += 1;
+      if (state.currentIndex < state.tracks.length) {
+        loadTrack(state.currentIndex);
+      } else {
+        updateProgress(state.tracks.length, state.tracks.length + 1, "最後の確認");
+        switchSection("secPost");
+      }
+    }
+
+    // =========================================================================
+    // 最終送信（縦持ち保存）
+    // =========================================================================
+    async function handleSubmit() {
+      const b1 = getCheckboxValues("B1");
+      const b2 = document.getElementById("B2Comment").value.trim();
+
+      if (b1.length === 0) {
+        showError("postError", "B1を選択してください（わかりにくい言葉がなければ「特になし」を選択）。");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      hideError("postError");
+
+      const payload = {
+        participant_id: state.participantId,
+        set_id: state.setId,
+        attributes: state.attributes,
+        trials: state.trials,
+        post_survey: {
+          B1_unclear_terms: b1,
+          B2_comment: b2
+        }
+      };
+
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = true;
+      btn.textContent = "回答を送信しています...";
+
+      try {
+        if (state.demoMode) {
+          console.log("[DEMO MODE] 送信データ:", payload);
+          await new Promise(r => setTimeout(r, 500));
+        } else {
+          // CORSプリフライト回避のため text/plain でJSON文字列をPOST
+          const res = await fetch(CONFIG.GAS_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.status !== "ok") {
+            throw new Error(data.message || "保存時にエラーが発生しました。");
+          }
+        }
+
+        updateProgress(1, 1, "回答完了");
+        document.getElementById("doneParticipantId").textContent = state.participantId;
+        switchSection("secDone");
+      } catch (err) {
+        showError("postError", "送信に失敗しました。通信状況をご確認のうえ、もう一度「回答を送信する」を押してください。（詳細: " + err.message + "）");
+        document.getElementById("backupBox").classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "回答を再送信する";
+      }
+    }
+
+    // 万一の通信失敗時に回答者側へバックアップCSVを出力するフェイルセーフ
+    function downloadBackupCSV() {
+      const b1 = getCheckboxValues("B1").join(", ");
+      const b2 = document.getElementById("B2Comment").value.trim().replace(/\r?\n/g, " ");
+      const headers = [
+        "participant_id", "set_id", "presentation_order", "track_id", "play_count",
+        "A1_device", "A2_age", "A3_jp_bg", "A4_music_exp", "A5_genres", "A6_inst_freq",
+        "Q1_a", "Q1_b", "Q1_c", "Q2_naturalness", "Q3_cues", "B1_unclear_terms", "B2_comment"
+      ];
+      const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const lines = [headers.join(",")];
+      state.trials.forEach(tr => {
+        lines.push([
+          state.participantId, state.setId, tr.presentation_order, tr.track_id, tr.play_count,
+          state.attributes.A1_device, state.attributes.A2_age, state.attributes.A3_jp_bg,
+          state.attributes.A4_music_exp, (state.attributes.A5_genres || []).join(", "),
+          state.attributes.A6_inst_freq, tr.Q1_a, tr.Q1_b, (tr.Q1_c || []).join(", "),
+          tr.Q2_naturalness, (tr.Q3_cues || []).join(", "), b1, b2
+        ].map(esc).join(","));
+      });
+      const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `survey_backup_${state.participantId}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // =========================================================================
+    // ユーティリティ
+    // =========================================================================
+    function switchSection(targetId) {
+      ["secIntro", "secAttrs", "secTrack", "secPost", "secDone"].forEach(id => {
+        document.getElementById(id).classList.toggle("hidden", id !== targetId);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function updateProgress(done, total, label) {
+      const pct = Math.round((done / total) * 100);
+      document.getElementById("progressLabel").textContent = label;
+      document.getElementById("progressPct").textContent = pct + "%";
+      document.getElementById("progressFill").style.width = pct + "%";
+    }
+
+    function getRadioValue(name) {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : "";
+    }
+
+    function getCheckboxValues(name) {
+      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+    }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+
+    function hideError(id) {
+      const el = document.getElementById(id);
+      el.textContent = "";
+      el.classList.add("hidden");
+    }
+
+    function formatTime(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const r = String(s % 60).padStart(2, "0");
+      return `${m}:${r}`;
+    }
+  </script>
+</body>
+</html>
